@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+	<PropertyGroup>
+		<AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+		<AssemblyOriginatorKeyFile>AdamMil.snk</AssemblyOriginatorKeyFile>
+		<Authors>Adam Milazzo (www.adammil.net)</Authors>
+		<Copyright>2020 Adam Milazzo</Copyright>
+		<Description>This package implements the SPDY protocol version 3.1 for .NET.</Description>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<IncludeSymbols>true</IncludeSymbols>
+		<LangVersion>7.3</LangVersion>
+		<PackageLicense>LGPL-2.1-or-later OR Apache-2.0</PackageLicense>
+		<PackageProjectUrl>https://github.com/adammil/SPDY.net</PackageProjectUrl>
+		<PackageTags>kubernetes;network;protocol;spdy</PackageTags>
+		<PublishRepositoryUrl>true</PublishRepositoryUrl>
+		<RootNamespace>SPDY</RootNamespace>
+		<SignAssembly>true</SignAssembly>
+		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		<TargetFrameworks>netstandard2.0;netstandard2.1;net45;net46;netcoreapp2.1;netcoreapp3.0</TargetFrameworks>
+		<TargetFrameworks Condition="'$(OS)' != 'Windows_NT'">netstandard2.0;netstandard2.1;netcoreapp2.1;netcoreapp3.0</TargetFrameworks>
+	</PropertyGroup>
+	<ItemGroup>
+		<PackageReference Include="Zlib.Portable.Signed" Version="1.11.0" NoWarn="NU1701" />
+	</ItemGroup>
+	<ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'net45' Or '$(TargetFramework)' == 'net46'">
+		<PackageReference Include="System.Buffers" Version="4.5.1" />
+		<PackageReference Include="System.Memory" Version="4.5.4" />
+	</ItemGroup>
+</Project>
