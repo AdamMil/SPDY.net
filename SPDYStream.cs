@@ -223,7 +223,7 @@ namespace SPDY
 				lock(lockObj)
 				{
 					if(this.headers == null) this.headers = new Dictionary<string, List<string>>();
-					foreach(KeyValuePair<string,List<string>> pair in headers) this.headers[pair.Key] = new List<string>(pair.Value);
+					foreach(KeyValuePair<string, List<string>> pair in headers) this.headers[pair.Key] = new List<string>(pair.Value);
 				}
 			}
 		}
@@ -286,7 +286,7 @@ namespace SPDY
 		readonly object lockObj = new object();
 		readonly bool _canRead, _canWrite;
 		readonly Pipe readPipe = new Pipe();
-		Dictionary<string,List<string>> headers;
+		Dictionary<string, List<string>> headers;
 		bool disposed;
 	}
 	#endregion

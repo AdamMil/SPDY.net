@@ -112,7 +112,7 @@ namespace SPDY
 		readonly AsyncAutoResetEvent readEvent = new AsyncAutoResetEvent();
 		bool disposed, finished;
 	}
-#endregion
+	#endregion
 
 	#region StreamBuffer
 	/// <summary>Implements a buffer into which data can be written and from which data can be read.</summary>

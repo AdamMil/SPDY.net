@@ -54,7 +54,7 @@ namespace SPDY
 
 		/// <summary>Gets or sets a function that determines whether a proposed stream should be accepted.</summary>
 		/// <remarks>The function must execute quickly and must not throw an exception.</remarks>
-		public Func<SPDYStream,bool> ShouldAccept { get; set; }
+		public Func<SPDYStream, bool> ShouldAccept { get; set; }
 
 		/// <summary>Gets the current <see cref="SPDYClientState"/> of the client.</summary>
 		public SPDYClientState State { get; private set; }
@@ -255,22 +255,28 @@ namespace SPDY
 			{
 				if(streams.TryGetValue(stream.Id, out StreamMeta meta))
 				{
-					inWindowPending += length; // ditto for the global flow control window
-					if(inWindowPending >= inWindowSpace/2)
+					if(UseFlowControl)
 					{
-						EnqueueControlFrame(SPDYFrame.Window(0, inWindowPending));
-						inWindowSpace += inWindowPending;
-						inWindowPending = 0;
+						inWindowPending += length; // ditto for the global flow control window
+						if(inWindowPending >= inWindowSpace/2)
+						{
+							EnqueueControlFrame(SPDYFrame.Window(0, inWindowPending));
+							inWindowSpace += inWindowPending;
+							inWindowPending = 0;
+						}
 					}
 
 					CloseStreamIfComplete(meta);
-					meta.inWindowPending += length; // record how much data has been consumed but not yet communicated
-					// if it reaches half the window size, let the other side know
-					if(stream.State != SPDYStreamState.Closed && meta.inWindowPending >= meta.inWindowSize/2)
+					if(UseFlowControl)
 					{
-						EnqueueControlFrame(SPDYFrame.Window(stream.Id, meta.inWindowPending));
-						meta.inWindowSpace += meta.inWindowPending; // then reset the window to its full size
-						meta.inWindowPending = 0;
+						meta.inWindowPending += length; // record how much data has been consumed but not yet communicated
+						// if it reaches half the window size, let the other side know
+						if(stream.State != SPDYStreamState.Closed && meta.inWindowPending >= meta.inWindowSize/2)
+						{
+							EnqueueControlFrame(SPDYFrame.Window(stream.Id, meta.inWindowPending));
+							meta.inWindowSpace += meta.inWindowPending; // then reset the window to its full size
+							meta.inWindowPending = 0;
+						}
 					}
 				}
 			}
@@ -429,7 +435,7 @@ namespace SPDY
 			lock(streams) // close all streams whose IDs are greater than that, as no Reset frame will be forthcoming
 			{
 				var deadStreams = new List<int>();
-				foreach(KeyValuePair<int,StreamMeta> pair in streams)
+				foreach(KeyValuePair<int, StreamMeta> pair in streams)
 				{
 					if(pair.Key > lastAcceptedStream && !IsRemoteId(pair.Key)) deadStreams.Add(pair.Key);
 				}

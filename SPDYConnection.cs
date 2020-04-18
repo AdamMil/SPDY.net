@@ -180,6 +180,10 @@ namespace SPDY
 			{
 				CloseCore();
 			}
+			catch(System.Net.Sockets.SocketException) // as might a SocketException
+			{
+				CloseCore();
+			}
 			return default(SPDYFrame); // if an error occurs, return an invalid frame
 		}
 
@@ -204,7 +208,7 @@ namespace SPDY
 			catch(Exception ex) // if an exception occurred, we don't know if the state of the stream has been corrupted
 			{
 				CloseCore(); // so stay on the safe side and close the connection
-				if(ex is ObjectDisposedException || ex is IOException) // if the exception indicates that the connection was closed...
+				if(ex is ObjectDisposedException || ex is IOException || ex is System.Net.Sockets.SocketException) // if the connection was closed...
 				{
 					throw new InvalidOperationException("The connection was closed.", ex); // normalize to a known exception
 				}
