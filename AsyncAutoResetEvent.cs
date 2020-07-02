@@ -1,5 +1,4 @@
-﻿// Copyright 2020 Microsoft Corporation
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
 
