@@ -73,6 +73,7 @@ namespace SPDY
 		/// <summary>Initializes a new <see cref="SPDYFrame"/> by reading the header from a data array.</summary>
 		public SPDYFrame(byte[] buffer, int index)
 		{
+			if(buffer == null) throw new ArgumentNullException();
 			_streamId = ReadUint(buffer, index);
 			uint flagsAndLength = ReadUint(buffer, index+4);
 			_flagsAndLength = flagsAndLength;
@@ -171,7 +172,7 @@ namespace SPDY
 		/// <summary>Writes an unsigned integer to the given index within the frame's data block.</summary>
 		public void Write(uint value, int index)
 		{
-			if((uint)index > (uint)DataLength-4) throw new ArgumentOutOfRangeException();
+			if((uint)index > (uint)DataLength-4) throw new ArgumentOutOfRangeException(nameof(index));
 			Write(_data, index, value);
 		}
 
@@ -205,7 +206,8 @@ namespace SPDY
 		/// <param name="final">Whether this is the last frame referring to the given stream. The default is false.</param>
 		public static SPDYFrame Headers(int streamId, byte[] headerData, bool final = false)
 		{
-			if(streamId <= 0) throw new ArgumentOutOfRangeException();
+			if(headerData == null) throw new ArgumentNullException(nameof(headerData));
+			if(streamId <= 0) throw new ArgumentOutOfRangeException(nameof(streamId));
 			var f = new SPDYFrame(SPDYFrameType.Headers, final ? SPDYFrameFlags.Final : 0, headerData.Length+4);
 			f.Write(streamId, 0);
 			Array.Copy(headerData, 0, f.Data, 4, headerData.Length);
@@ -226,7 +228,10 @@ namespace SPDY
 		public static SPDYFrame NewStream(int streamId, byte[] headerData, bool unidirectional = false, bool final = false, int associatedStreamId = 0,
 		                                  int priority = 3)
 		{
-			if(streamId <= 0 || associatedStreamId < 0 || (uint)priority > 7) throw new ArgumentOutOfRangeException();
+			if(streamId <= 0) throw new ArgumentOutOfRangeException(nameof(streamId));
+			if(headerData == null) throw new ArgumentNullException(nameof(headerData));
+			if(associatedStreamId < 0) throw new ArgumentOutOfRangeException(nameof(associatedStreamId));
+			if((uint)priority > 7) throw new ArgumentOutOfRangeException(nameof(priority));
 			var flags = (unidirectional ? SPDYFrameFlags.Unidirectional : 0) | (final ? SPDYFrameFlags.Final : 0);
 			var f = new SPDYFrame(SPDYFrameType.Stream, flags, headerData.Length+10);
 			f.Write(streamId, 0);
@@ -251,7 +256,7 @@ namespace SPDY
 		/// <param name="settings">An array of <see cref="SPDYSetting"/> objects describing the new setting values</param>
 		public static SPDYFrame Settings(bool clearPreviousSettings, params SPDYSetting[] settings)
 		{
-			if(settings == null) throw new ArgumentNullException();
+			if(settings == null) throw new ArgumentNullException(nameof(settings));
 			var f = new SPDYFrame(
 				SPDYFrameType.Settings, clearPreviousSettings ? SPDYFrameFlags.Clear : 0, settings != null ? settings.Length*8+4 : 4);
 			f.Write(settings.Length, 0);
@@ -270,7 +275,8 @@ namespace SPDY
 		/// <param name="final">Whether this is the last frame referring to the given stream. The default is false.</param>
 		public static SPDYFrame Reply(int streamId, byte[] headerData, bool final = false)
 		{
-			if(streamId <= 0) throw new ArgumentOutOfRangeException();
+			if(streamId <= 0) throw new ArgumentOutOfRangeException(nameof(streamId));
+			if(headerData == null) throw new ArgumentNullException(nameof(headerData));
 			var f = new SPDYFrame(SPDYFrameType.Reply, final ? SPDYFrameFlags.Final : 0, headerData.Length+4);
 			f.Write(streamId, 0);
 			Array.Copy(headerData, 0, f.Data, 4, headerData.Length);
@@ -282,7 +288,7 @@ namespace SPDY
 		/// <param name="reason">The <see cref="SPDYResetReason"/> why the stream is being closed</param>
 		public static SPDYFrame Reset(int streamId, SPDYResetReason reason)
 		{
-			if(streamId <= 0) throw new ArgumentOutOfRangeException();
+			if(streamId <= 0) throw new ArgumentOutOfRangeException(nameof(streamId));
 			var f = new SPDYFrame(SPDYFrameType.Reset, 0, 8);
 			f.Write(streamId, 0);
 			f.Write((uint)reason, 4);
@@ -296,7 +302,8 @@ namespace SPDY
 		/// <param name="delta">The number of additional bytes that the recipient is allowed to send</param>
 		public static SPDYFrame Window(int streamId, int delta)
 		{
-			if(streamId < 0 || delta <= 0) throw new ArgumentOutOfRangeException();
+			if(streamId < 0) throw new ArgumentOutOfRangeException(nameof(streamId));
+			if(delta <= 0) throw new ArgumentOutOfRangeException(nameof(delta));
 			var f = new SPDYFrame(SPDYFrameType.Window, 0, 8);
 			f.Write(streamId, 0);
 			f.Write(delta, 4);
@@ -420,8 +427,9 @@ namespace SPDY
 		/// <summary>Initializes a new <see cref="SPDYSetting"/> by reading it out of an array.</summary>
 		public SPDYSetting(byte[] data, int index)
 		{
-			_flagsAndId = SPDYFrame.ReadUint(data, 0);
-			Value = SPDYFrame.ReadUint(data, 4);
+			if(data == null) throw new ArgumentNullException(nameof(data));
+			_flagsAndId = SPDYFrame.ReadUint(data, index);
+			Value = SPDYFrame.ReadUint(data, index+4);
 		}
 
 		/// <summary>The <see cref="SPDYSettingFlags"/> of the setting.</summary>

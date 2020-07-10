@@ -21,7 +21,7 @@ namespace SPDY
 		/// <param name="globalWindowSize">The receive window size for the entire connection, in bytes. The default is 1MB.</param>
 		public SPDYClient(SPDYConnection connection, bool isClient = true, int streamWindowSize = 256*1024, int globalWindowSize = 1024*1024)
 		{
-			this.conn = connection ?? throw new ArgumentNullException();
+			this.conn = connection ?? throw new ArgumentNullException(nameof(connection));
 			if(streamWindowSize <= 0) throw new ArgumentOutOfRangeException(nameof(streamWindowSize));
 			if(globalWindowSize <= 0) throw new ArgumentOutOfRangeException(nameof(globalWindowSize));
 			defaultInWindowSize = Math.Max(streamWindowSize, 8192);
@@ -124,6 +124,7 @@ namespace SPDY
 				streams.Clear();
 				writableStreamList.Clear();
 			}
+			writeEvent.Dispose();
 		}
 
 		/// <summary>Gets the stream with the given ID, or returns null if no such stream exists.</summary>
